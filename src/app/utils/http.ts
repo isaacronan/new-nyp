@@ -69,8 +69,8 @@ const createParamRegistry = () => {
 const paramRegistry = createParamRegistry();
 
 paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['inner:::h1.headline', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
-paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['inner:::h1', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
-paramRegistry.register('decider.com', 'https://decider.com/feed/', ['inner:::h1.story__heading', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
+paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['inner:::h1', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::data-srcset']);
+paramRegistry.register('decider.com', 'https://decider.com/feed/', ['inner:::h1.story__heading', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::data-srcset']);
 
 
 export const getStory: (url: string) => Promise<IStory> = async (url) => {
@@ -84,6 +84,6 @@ export const getStory: (url: string) => Promise<IStory> = async (url) => {
     return {
         title: response.results[0],
         paragraphs: response.results[1],
-        media: response.results[2].map((url: string) => url.replace(/\?.*$/, ''))
+        media: response.results[2].filter((url: string) => url !== null).map((url: string) => url.split(' ')[0].replace(/\?.*$/, ''))
     }
 };

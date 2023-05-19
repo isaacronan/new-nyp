@@ -17,7 +17,7 @@ export interface ISummary {
 }
 
 const mediaElementToMedia: (mediaElement: any) => IMedia = (mediaElement) => {
-    const url = mediaElement.attributes.url;
+    const url = mediaElement.attributes.url.replace(/\?.*$/, '');
     const title = mediaElement.elements === undefined ? null : mediaElement.elements[0].elements[0].text;
     return { url, title };
 };
@@ -38,7 +38,8 @@ export const getSummaries: (path: string) => Promise<ISummary[]> = async (path) 
 
 interface IStory {
     title: string;
-    paragraphs: string[]
+    paragraphs: string[];
+    media: string[];
 }
 
 interface IScrapeParams {
@@ -67,9 +68,9 @@ const createParamRegistry = () => {
 
 const paramRegistry = createParamRegistry();
 
-paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['h1.headline', '.entry-content p']);
-paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['h1', '.entry-content p']);
-paramRegistry.register('decider.com', 'https://decider.com/feed/', ['h1.story__heading', '.entry-content p']);
+paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['inner:::h1.headline', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
+paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['inner:::h1', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
+paramRegistry.register('decider.com', 'https://decider.com/feed/', ['inner:::h1.story__heading', 'inner:::.entry-content p', 'attr:::.entry-content figure img:::src']);
 
 
 export const getStory: (url: string) => Promise<IStory> = async (url) => {
@@ -82,6 +83,7 @@ export const getStory: (url: string) => Promise<IStory> = async (url) => {
     const response = await (await fetch(`http://localhost:3004/scrape?${queryString}`)).json();
     return {
         title: response.results[0],
-        paragraphs: response.results[1]
+        paragraphs: response.results[1],
+        media: response.results[2].map((url: string) => url.replace(/\?.*$/, ''))
     }
 };

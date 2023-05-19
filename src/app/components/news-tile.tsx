@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const NewsTile = (props: PropsWithChildren<{ summary: ISummary }>) => {
     return (
-        <Link href={`/story?url=${props.summary.link}`}>
+        <Link prefetch={false} href={`/story?url=${props.summary.link}`}>
             <div className="flex">
                 <img height="100" width="100" src={props.summary.media[0].url} alt="" />
                 <div>

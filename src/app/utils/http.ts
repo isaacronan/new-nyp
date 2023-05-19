@@ -31,7 +31,7 @@ const itemElementToSummary: (itemElement: any) => ISummary = (itemElement) => {
 };
 
 export const getSummaries: (path: string) => Promise<ISummary[]> = async (path) => {
-    const feed = await fetch(`https://nypost.com${path}feed`).then(r => r.text()).then(xmlToJson);
+    const feed = await fetch(`https://nypost.com${path === '/' ? path : path + '/'}feed`).then(r => r.text()).then(xmlToJson);
     const itemElements = feed.elements[0].elements[0].elements.filter((el: any) => el.name === 'item')
     return itemElements.map(itemElementToSummary);
 };
@@ -40,14 +40,46 @@ interface IStory {
     paragraphs: string[]
 }
 
+interface IScrapeParams {
+    rootUrl: string;
+    scrapeUrl: string;
+    selectors: string[];
+}
+
+const createParamRegistry = () => {
+    const registry: { [domain: string]: { rootUrl: string, selectors: string[] }} = {};
+
+    const register = (domain: string, rootUrl: string, selectors: string[]) => {
+        registry[domain] = { rootUrl, selectors };
+    };
+
+    const get: (scrapeUrl: string) => IScrapeParams = (scrapeUrl) => {
+        const domain = scrapeUrl.split('/')[2];
+        return {
+            ...registry[domain],
+            scrapeUrl
+        }
+    };
+
+    return { register, get };
+}
+
+const paramRegistry = createParamRegistry();
+
+paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['.entry-content p']);
+paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['.entry-content p']);
+paramRegistry.register('decider.com', 'https://decider.com/feed/', ['.entry-content p']);
+
+
 export const getStory: (url: string) => Promise<IStory> = async (url) => {
-    const params = [
-        'rootUrl=https://nypost.com/news/feed/',
-        `scrapeUrl=${url}`,
-        'selector=.entry-content p'
+    const params = paramRegistry.get(url);
+    const queryString = [
+        `rootUrl=${params.rootUrl}`,
+        `scrapeUrl=${params.scrapeUrl}`,
+        ...params.selectors.map(selector => `selector=${selector}`)
     ].join('&');
-    const response = await (await fetch(`http://localhost:3004/scrape?${params}`)).json();
+    const response = await (await fetch(`http://localhost:3004/scrape?${queryString}`)).json();
     return {
-        paragraphs: response.results
+        paragraphs: response.results[0]
     }
 };

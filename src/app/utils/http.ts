@@ -37,6 +37,7 @@ export const getSummaries: (path: string) => Promise<ISummary[]> = async (path) 
 };
 
 interface IStory {
+    title: string;
     paragraphs: string[]
 }
 
@@ -66,9 +67,9 @@ const createParamRegistry = () => {
 
 const paramRegistry = createParamRegistry();
 
-paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['.entry-content p']);
-paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['.entry-content p']);
-paramRegistry.register('decider.com', 'https://decider.com/feed/', ['.entry-content p']);
+paramRegistry.register('nypost.com', 'https://nypost.com/feed/', ['h1.headline', '.entry-content p']);
+paramRegistry.register('pagesix.com', 'https://pagesix.com/feed/', ['h1', '.entry-content p']);
+paramRegistry.register('decider.com', 'https://decider.com/feed/', ['h1.story__heading', '.entry-content p']);
 
 
 export const getStory: (url: string) => Promise<IStory> = async (url) => {
@@ -80,6 +81,7 @@ export const getStory: (url: string) => Promise<IStory> = async (url) => {
     ].join('&');
     const response = await (await fetch(`http://localhost:3004/scrape?${queryString}`)).json();
     return {
-        paragraphs: response.results[0]
+        title: response.results[0],
+        paragraphs: response.results[1]
     }
 };

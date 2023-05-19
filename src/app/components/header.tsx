@@ -16,7 +16,7 @@ export const Header = () => {
             <ul>
                 {sections.map(section => (
                     <span className="px-[1.0rem]">
-                        <Link href={section.path}>{section.title}</Link>
+                        <Link href={`/sections${section.path}`}>{section.title}</Link>
                     </span>
                 ))}
             </ul>

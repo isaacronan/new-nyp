@@ -31,7 +31,23 @@ const itemElementToSummary: (itemElement: any) => ISummary = (itemElement) => {
 };
 
 export const getSummaries: (path: string) => Promise<ISummary[]> = async (path) => {
-    const feed = await fetch(`https://nypost.com${path}/feed`).then(r => r.text()).then(xmlToJson);
+    const feed = await fetch(`https://nypost.com${path}feed`).then(r => r.text()).then(xmlToJson);
     const itemElements = feed.elements[0].elements[0].elements.filter((el: any) => el.name === 'item')
     return itemElements.map(itemElementToSummary);
+};
+
+interface IStory {
+    paragraphs: string[]
+}
+
+export const getStory: (url: string) => Promise<IStory> = async (url) => {
+    const params = [
+        'rootUrl=https://nypost.com/news/feed/',
+        `scrapeUrl=${url}`,
+        'selector=.entry-content p'
+    ].join('&');
+    const response = await (await fetch(`http://localhost:3004/scrape?${params}`)).json();
+    return {
+        paragraphs: response.results
+    }
 };

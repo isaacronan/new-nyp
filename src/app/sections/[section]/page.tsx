@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { NewsTilelist } from '../components/news-tile-list';
-import { sections } from '../utils/sections';
+import { NewsTilelist } from '../../components/news-tile-list';
+import { sections } from '../../utils/sections';
 
 export default async function Section({ params }: { params: { section: string }}) {
   const section = sections.find(section => section.path.startsWith(`/${params.section}`))!;

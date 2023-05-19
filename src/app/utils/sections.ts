@@ -1,7 +1,7 @@
 export const sections = [
     {
         title: 'All Stories',
-        path: '',
+        path: '/',
     },
     {
         title: 'News',
